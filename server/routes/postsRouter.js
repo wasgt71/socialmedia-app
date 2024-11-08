@@ -1,20 +1,20 @@
 const express = require("express");
 const postsRouter = express.Router();
 
-let posts = {
-  1: {
+let posts = [
+  {
     id: "1",
     title: "about me",
     message: "Hey im robin",
     date: new Date(),
   },
-  2: {
+  {
     id: "2",
     title: "about this journey",
     message: "hey im dave",
     date: new Date(),
   },
-};
+];
 
 postsRouter.get("/", (req, res) => {
   return res.json(Object.values(posts));
@@ -29,10 +29,26 @@ postsRouter.get("/:postId", (req, res) => {
   }
 });
 
-postsRouter.post('/posts', (req, res) => {
+postsRouter.post("/new", (req, res) => {
   const { title, message } = req.body;
-  posts.push({ title, message });
+
+  if (!title || !message) {
+    return res
+      .status(400)
+      .json({ error: "Both title and message are required." });
+  }
+
+  const newPost = { title, message };
+  posts.push(newPost);
+
   console.log(posts);
-})
+  return res
+    .status(201)
+    .json({
+      success: true,
+      message: "Post created successfully!",
+      data: newPost,
+    });
+});
 
 module.exports = postsRouter;
