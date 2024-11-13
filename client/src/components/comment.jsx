@@ -4,6 +4,7 @@ function Comment() {
 const [unlock, setLock] = useState(false);
 const [ showButton, setShowButton ] = useState(true);
 const [ data, setData ] = useState("");
+const [ comments, setComments ] = useState([]);
 
 const handleClick = () => {
 setLock(true);
@@ -29,7 +30,12 @@ const response = fetch('http://localhost:3000/comment', {
   body: JSON.stringify(commentData),
 });
 
-console.log(response);
+
+setComments((prevComments) => [...prevComments, { comment: data }]);
+
+setData("");
+
+console.log(setComments);
  }
 
 
@@ -47,6 +53,10 @@ console.log(response);
         <button type="submit">Post</button>
         )}
         </form>
+        {comments.map((comment) => (
+        <p>{comment.comment}</p>
+        ))}
+        
     </div>
     </>
   )
