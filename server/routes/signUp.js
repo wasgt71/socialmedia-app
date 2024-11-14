@@ -3,7 +3,7 @@ const signUpRouter = Router();
 const { PrismaClient } = require('@prisma/client')
 const prisma = new PrismaClient()
 
-const profile = [{name: "l"}];
+const profile = [];    //{name: "l"}
 
 signUpRouter.get("/", (req, res) => {
   return res.json(Object.values(profile));
