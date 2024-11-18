@@ -10,12 +10,12 @@ const userData = [
     }
 ]
 
-
   const handleClick = async (e) => {
     const response = await myApi.post("/allusers", userData, {
       withCredentials: true,
     });
-    console.log(response);
+    setUsers(response.data);
+    console.log(users);
    
   };
 
@@ -23,6 +23,18 @@ const userData = [
     <>
       <div>
         <button onClick={handleClick}>Find</button>
+      </div>
+      <div>
+        {users.map((user) => {
+          return(
+            <>
+            <p>{user.username}</p>
+            <p>{user.id}</p>
+            <p>{user.email}</p>
+            <button>Follow</button>
+            </>
+          )
+        })}
       </div>
     </>
   );
