@@ -2,28 +2,27 @@ import myApi from "../components/axios";
 import { useState } from 'react';
 
 
-function Follow() {
-  const [followRequest, setFollowRequest] = useState(false);
+function Follow( { username }) {
+  const [followRequest, setFollowRequest] = useState();
   const [requestData, setRequestData] = useState([]);
 
-  const followData = [
-    {
-      followRequest,
-    },
-  ];
-
+  const followData = [{
+    username,
+  }]
+ 
   const handleFollow = async (e) => {
-    setFollowRequest({ request: e.target.value });
+    
 
-    const response = await myApi.post("/follow", followData, {
+    const response = await myApi.post("/follow/requests", followData, {
       withCredentials: true,
     });
+  console.log(followData);
   };
 
   return (
     <>
     <div>
-    <button value={user.username} onClick={handleFollow}>Follow</button>
+    <button username={username} onClick={handleFollow}>Follow</button>
     </div>
     </>
   )
