@@ -4,19 +4,21 @@ const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
 followRouter.post("/requests", async (req, res) => {
-  const username = req.body;
-  const user = req.user;
-  const client = user.username;
-
+  const otherUser = req.body;
+  
+  
   const followRequest = await prisma.userinfo.update({
-    where: { username: username },
+   where: { username: otherUser.toString() },
     data: {
-      requests: client,
+      requests: {
+       push: "Christa",
+      },
     },
   });
 
   console.log(followRequest);
-  return res.json(req.user);
+  return res.json(req.body);
 });
 
 module.exports = followRouter;
+
