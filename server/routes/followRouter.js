@@ -55,4 +55,9 @@ followRouter.post("/requests/accept", async (req, res) => {
   
 });
 
+followRouter.post('/requests/decline', async (req, res) => {
+  
+})
+
+
 module.exports = followRouter;
