@@ -3,32 +3,57 @@ import { Link } from "react-router-dom";
 import myApi from "../components/axios";
 
 function Profile() {
-const [ user, setUser ] = useState([]);
+  const [user, setUser] = useState([]);
+  const [lock, setLock] = useState(false);
+  
+  const onRender = async (e) => {
+    const response = await myApi.post("/profile", {
+      withCredentials: true,
+    });
+    console.log(response);
+    setUser({
+      username: response.data.username,
+      followRequests: response.data.requests,
+    });
+  };
+  useEffect(() => {
+    onRender();
+  }, []);
 
-const onRender = async (e) => {
-  const response = await myApi.post("/profile", {
-    withCredentials: true,
-  });
-    console.log(response.data.username);
-    setUser({userInfo: response.data.username })
+  const handleClick = () => {
+    setLock(true);
+  };
 
 
-}
-useEffect(() => {
-onRender();
-}, []);
-
+  const acceptFollower = async (e) => {
+    let name = e.target.value; //Used let so upon click name data changes on render
+    console.log(name);//And is always sent to server correctly
+    const response = await myApi.post("/follow/requests/accept", [name], {
+      withCredentials: true,
+    });
+  }
 
   return (
     <>
       <div>
-        <h1>{user.userInfo}</h1>
-        <img id="profile-picture"></img>
+        <h1>{user.username}</h1>
+        <img id="profile-picture" />
+        <button onClick={handleClick}>Follow Requests</button>
+
+        {lock && (
+          <>
+            {user.followRequests.map((request) => (
+              <div>
+                <h4>{request} requested to follow you.</h4>
+                <button value={request} onClick={acceptFollower}>Accept</button>
+                <button>Decline</button>
+              </div>
+            ))}
+          </>
+        )}
+
         <button>Edit Profile</button>
       </div>
-
-      <div id="Posts"></div>
-
       <div>
         <Link to="/displayposts">Home</Link>
       </div>
@@ -43,4 +68,3 @@ onRender();
 }
 
 export default Profile;
-
