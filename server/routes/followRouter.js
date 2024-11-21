@@ -5,11 +5,12 @@ const prisma = new PrismaClient();
 
 followRouter.post("/requests", async (req, res) => {
   const otherUser = req.body;
+  const user = req.user.username;
   const followRequest = await prisma.userinfo.update({
     where: { username: otherUser.toString() },
     data: {
       requests: {
-        push: "Christa",
+        push: user,
       },
     },
   });
@@ -19,16 +20,24 @@ followRouter.post("/requests", async (req, res) => {
 });
 
 followRouter.post("/requests/accept", async (req, res) => {
+  const { name } = req.body;
   const user = req.user.username;
+  console.log(user);
+  console.log(req.body.toString());
 
+   //Finds users prisma model.
 
-  const confusing = await prisma.userinfo.findUnique({
+   const findModel = await prisma.userinfo.findUnique({
     where: { username: user },
-    
   });
 
-  const removeRequest = confusing.requests.filter(request => request !== "Christa");
-  
+  //Removes Requests that return false to .filter.
+
+  const removeRequest = findModel.requests.filter(
+    (request) => request !== req.body.toString()
+  );
+
+  //Updates Requests array in prisma model, pushes request into followers.
 
   const acceptRequest = await prisma.userinfo.update({
     where: { username: user },
@@ -37,13 +46,13 @@ followRouter.post("/requests/accept", async (req, res) => {
         set: removeRequest,
       },
       followers: {
-        push: "Christa",
+        push: req.body.toString(),
       },
     },
   });
 
   console.log(acceptRequest);
+  
 });
-
 
 module.exports = followRouter;
