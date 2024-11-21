@@ -32,6 +32,14 @@ function Profile() {
       withCredentials: true,
     });
   }
+  
+   const declineFollower = async (e) => {
+    let name = e.target.value;
+    console.log(name);
+    const response = await myApi.post("/follow/requests/decline", [name], {
+      withCredentials: true,
+    })
+   }
 
   return (
     <>
@@ -46,7 +54,7 @@ function Profile() {
               <div>
                 <h4>{request} requested to follow you.</h4>
                 <button value={request} onClick={acceptFollower}>Accept</button>
-                <button>Decline</button>
+                <button value={request} onClick={declineFollower}>Decline</button>
               </div>
             ))}
           </>
