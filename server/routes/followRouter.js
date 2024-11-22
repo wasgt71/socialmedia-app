@@ -13,11 +13,34 @@ followRouter.post("/requests", async (req, res) => {
         push: user,
       },
     },
+    
   });
 
   console.log(followRequest);
   return res.json(req.body);
 });
+
+followRouter.post("/requests/requested", async (req, res) => {
+const otherUser = req.body;
+const user = req.user.username;
+console.log(otherUser.toString());
+
+const confirmRequest = await prisma.userinfo.findUnique({
+where: { username: otherUser.toString() },
+select: {
+requests: true,
+},
+
+});
+
+if(confirmRequest.requests.includes(user)) {
+  return res.status(200).json(req.body);
+}
+
+console.log(confirmRequest);
+});
+
+
 
 followRouter.post("/requests/accept", async (req, res) => {
   const { name } = req.body;
@@ -48,6 +71,7 @@ followRouter.post("/requests/accept", async (req, res) => {
     },
   });
 
+// Update user from requested to follow user to following user.
 const updateFollowing = await prisma.userinfo.update({
   where: { username: req.body.toString() },
   data: {
@@ -60,6 +84,7 @@ const updateFollowing = await prisma.userinfo.update({
   console.log(acceptRequest);
   console.log(updateFollowing);
 });
+
 
 // Locate prisma model and remove request.
 followRouter.post('/requests/decline', async (req, res) => {
