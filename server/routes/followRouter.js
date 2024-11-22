@@ -48,8 +48,17 @@ followRouter.post("/requests/accept", async (req, res) => {
     },
   });
 
+const updateFollowing = await prisma.userinfo.update({
+  where: { username: req.body.toString() },
+  data: {
+    following: {
+      push: user,
+    },
+  },
+});
+
   console.log(acceptRequest);
-  
+  console.log(updateFollowing);
 });
 
 // Locate prisma model and remove request.
