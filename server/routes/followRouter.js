@@ -20,6 +20,8 @@ followRouter.post("/requests", async (req, res) => {
   return res.json(req.body);
 });
 
+//Confirms user has requested to follow other user. Changes follow button
+//Display to "requested".
 followRouter.post("/requests/requested", async (req, res) => {
 const otherUser = req.body;
 const user = req.user.username;
@@ -40,7 +42,24 @@ if(confirmRequest.requests.includes(user)) {
 console.log(confirmRequest);
 });
 
+//confirms initialuser is following other user. 
+//displays "following" on UI.
+followRouter.post("/requests/following", async (req, res) => {
+const otherUser = req.body;
+const user = req.user.username;
 
+const confirmFollow = await prisma.userinfo.findUnique({
+where: { username: user },
+select: {
+  following: true,
+},
+});
+
+if(confirmFollow.following.includes(otherUser.toString())) {
+  return res.status(200).json(req.body);
+}
+console.log(confirmFollow);
+});
 
 followRouter.post("/requests/accept", async (req, res) => {
   const { name } = req.body;
