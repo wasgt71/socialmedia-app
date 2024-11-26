@@ -5,51 +5,62 @@ function Follow({ username }) {
   const [lock, setLock] = useState(true);
   const [request, setRequest] = useState("Follow");
 
+  //FUNCTION WORKS WHEN CONFIRM REQUEST AND CONFIRM FOLLOW ARE OFF
+  // When user clicks follow button, username of user initial user requested to follow
+  // is sent to server and added to database.
+  
+  const handleFollow = async () => {
+    console.log(request);
 
-// When user clicks follow button, username of user initial user requested to follow
-// is sent to server and added to database.
-  const handleFollow = async (e) => {
-    setLock(false);
-    const response = await myApi.post("/follow/requests", [username], {
-      withCredentials: true,
-    });
-    console.log(username);
-  };
-
-  // Sends usernames to server to verify if initial user has requested to follow.
-  const confirmRequest = async () => {
-    console.log("hello");
-    const response = await myApi.post("/follow/requests/requested", [username], {
-      withCredentials: true,
-    });
-
-  // If initial user has requested to follow, server responds with status(200).
-  // If status(200), request state is set to "Requested". UI displays "Requested" instead of "Follow".
-    if (response.status === 200) {
-      setRequest("Requested");
+      if (request === "Follow") {
+      const response = await myApi.post("/follow", [username], {
+        withCredentials: true,
+      });
+        setRequest("Following");
+    
+    } else {
+      setRequest("Follow");
       console.log(request);
+      const response = await myApi.post("/follow/remove", [username], {
+        withCredentials: true,
+      });
+      setLock(true);
+    }
+  }
+  
+
+
+  const confirmFollow = async () => {
+    console.log("hello");
+    if (lock) {
+      const response = await myApi.post("/follow/status", [username], {
+        withCredentials: true,
+      });
+      if (response.status === 200) {
+        setRequest("Following");
+      }
     }
   };
 
-  const confirmFollow = async () => {
-  const response = await myApi.post("/follow/requests/following", [username], {
-  });
-
-  if(response.status === 200) {
-   setRequest("Following");
-  }
+  const handleFunction = () => {
+    setLock(false);
+    handleFollow();
   };
 
   useEffect(() => {
-    confirmRequest();
     confirmFollow();
-  }, []);
+  }, [username]);
   
+
   return (
     <>
       <>
         <div>
-          <button username={username} onClick={handleFollow}>
+          <button
+            username={username}
+            onClick={handleFunction}
+            
+          >
             {request}
           </button>
         </div>
