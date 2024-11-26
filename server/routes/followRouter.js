@@ -3,135 +3,107 @@ const followRouter = Router();
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
-followRouter.post("/requests", async (req, res) => {
+//FUNCTION WORKS
+followRouter.post("/", async (req, res) => {
   const otherUser = req.body;
   const user = req.user.username;
-  const followRequest = await prisma.userinfo.update({
+  console.log("otherUser", otherUser)
+  console.log("User", user)
+  //ADD FOLLOWER
+  const followUser = await prisma.userinfo.update({
     where: { username: otherUser.toString() },
     data: {
-      requests: {
+      followers: {
         push: user,
       },
     },
     
   });
+//ADD FOLLOWING
+  const addFollower = await prisma.userinfo.update({
+    where: { username: user },
+    data: {
+      following: {
+        push: otherUser.toString(),
+      },
+    },
+  });
 
-  console.log(followRequest);
-  return res.json(req.body);
+console.log(followUser);
+console.log(addFollower);
+
+  
 });
+
 
 //Confirms user has requested to follow other user. Changes follow button
 //Display to "requested".
-followRouter.post("/requests/requested", async (req, res) => {
-const otherUser = req.body;
-const user = req.user.username;
-console.log(otherUser.toString());
-
-const confirmRequest = await prisma.userinfo.findUnique({
-where: { username: otherUser.toString() },
-select: {
-requests: true,
-},
-
-});
-
-if(confirmRequest.requests.includes(user)) {
-  return res.status(200).json(req.body);
-}
-
-console.log(confirmRequest);
-});
-
-//confirms initialuser is following other user. 
-//displays "following" on UI.
-followRouter.post("/requests/following", async (req, res) => {
+followRouter.post("/status", async (req, res) => {
 const otherUser = req.body;
 const user = req.user.username;
 
 const confirmFollow = await prisma.userinfo.findUnique({
-where: { username: user },
-select: {
-  following: true,
-},
-});
-
-if(confirmFollow.following.includes(otherUser.toString())) {
-  return res.status(200).json(req.body);
-}
-console.log(confirmFollow);
-});
-
-followRouter.post("/requests/accept", async (req, res) => {
-  const { name } = req.body;
-  const user = req.user.username;
-  console.log(user);
-  console.log(req.body.toString());
-
-   // Finds users prisma model.
-   const findModel = await prisma.userinfo.findUnique({
-    where: { username: user },
-  });
-
-  // Removes Requests that return false to .filter.
-  const removeRequest = findModel.requests.filter(
-    (request) => request !== req.body.toString()
-  );
-
-  // Updates Requests array in prisma model, pushes request into followers.
-  const acceptRequest = await prisma.userinfo.update({
-    where: { username: user },
-    data: {
-      requests: {
-        set: removeRequest,
-      },
-      followers: {
-        push: req.body.toString(),
-      },
-    },
-  });
-
-// Update user from requested to follow user to following user.
-const updateFollowing = await prisma.userinfo.update({
-  where: { username: req.body.toString() },
-  data: {
-    following: {
-      push: user,
-    },
+  where: { username: user },
+  select: {
+    following: true,
   },
+  });
+  
+  if(confirmFollow.following.includes(otherUser.toString())) {
+    return res.status(200).json(req.body);
+  }
+
+  console.log(confirmFollow);
+  
 });
 
-  console.log(acceptRequest);
-  console.log(updateFollowing);
-});
 
 
-// Locate prisma model and remove request.
-followRouter.post('/requests/decline', async (req, res) => {
-  const { name } = req.body;
+//GOOD FUNCTION
+followRouter.post('/remove', async (req, res) => {
+  const otherUser = req.body;
   const user = req.user.username;
 
-// Locates specific prisma model.
-  const findModel = await prisma.userinfo.findUnique({
-    where: { username: user },
+
+  const findOtherUser = await prisma.userinfo.findUnique({
+    where: { username: otherUser.toString() },
   });
 
-  // creates new request arr without initial request.
-  const removeRequest = findModel.requests.filter(
-    (request) => request !== req.body.toString()
+  
+  const removeFollow = findOtherUser.followers.filter(
+    (follower) => follower !== user,
   );
 
-  // Updates prisma model with new requests arr.
-  const updateRequest = await prisma.userinfo.update({
-    where: { username: user },
+  
+  const updateFollowers = await prisma.userinfo.update({
+    where: { username: otherUser.toString() },
     data: {
-      requests: {
-        set: removeRequest,
+      followers: {
+        set: removeFollow,
       },
     }
 })
+ 
+const findUser = await prisma.userinfo.findUnique({
+  where: { username: user },
+});
 
-console.log(updateRequest);
+const removeFollowing = findUser.following.filter(
+  (follow) => follow !== otherUser.toString(),
+);
 
+const updateFollowing = await prisma.userinfo.update({
+  where: { username: user },
+  data: {
+    following: {
+      set: removeFollowing,
+    },
+  }
+})
+
+
+console.log(updateFollowers);
+console.log(updateFollowing)
 });
 
 module.exports = followRouter;
