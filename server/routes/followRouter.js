@@ -31,7 +31,7 @@ followRouter.post("/", async (req, res) => {
 
 console.log(followUser);
 console.log(addFollower);
-
+return res.status(200).json(req.body);
   
 });
 
@@ -104,6 +104,7 @@ const updateFollowing = await prisma.userinfo.update({
 
 console.log(updateFollowers);
 console.log(updateFollowing)
+return res.status(200).json(req.body);
 });
 
 module.exports = followRouter;
