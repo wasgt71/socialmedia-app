@@ -5,62 +5,62 @@ function Follow({ username }) {
   const [lock, setLock] = useState(true);
   const [request, setRequest] = useState("Follow");
 
-  //FUNCTION WORKS WHEN CONFIRM REQUEST AND CONFIRM FOLLOW ARE OFF
-  // When user clicks follow button, username of user initial user requested to follow
-  // is sent to server and added to database.
-  
+
   const handleFollow = async () => {
     console.log(request);
-
-      if (request === "Follow") {
-      const response = await myApi.post("/follow", [username], {
-        withCredentials: true,
-      });
-        setRequest("Following");
-    
+    if (request === "Follow") {
+      try {
+        const response = await myApi.post("/follow", [username], {
+          withCredentials: true,
+        });
+        if (response.status === 200) {
+          setRequest("Following");
+        }
+      } catch (error) {
+        console.error(error);
+      }
     } else {
       setRequest("Follow");
       console.log(request);
-      const response = await myApi.post("/follow/remove", [username], {
-        withCredentials: true,
-      });
-      setLock(true);
-    }
-  }
-  
-
-
-  const confirmFollow = async () => {
-    console.log("hello");
-    if (lock) {
-      const response = await myApi.post("/follow/status", [username], {
-        withCredentials: true,
-      });
-      if (response.status === 200) {
-        setRequest("Following");
+      try {
+        const response = await myApi.post("/follow/remove", [username], {
+          withCredentials: true,
+        });
+        if (response.status === 200) {
+          setLock(true);
+        }
+      } catch (error) {
+        console.error(error);
       }
     }
   };
 
-  const handleFunction = () => {
-    setLock(false);
-    handleFollow();
+  const confirmFollow = async () => {
+    console.log("hello");
+    if (lock) {
+      try {
+        const response = await myApi.post("/follow/status", [username], {
+          withCredentials: true,
+        });
+        if (response.status === 200) {
+          setRequest("Following");
+          setLock(false);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    }
   };
 
   useEffect(() => {
     confirmFollow();
-  }, [username]);
-  
+  }, []);
 
   return (
     <>
       <>
         <div>
-          <button
-            username={username}
-            onClick={handleFunction}
-            
-          >
+          <button username={username} onClick={handleFollow}>
             {request}
           </button>
         </div>
