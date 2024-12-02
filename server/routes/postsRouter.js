@@ -1,54 +1,49 @@
 const express = require("express");
 const postsRouter = express.Router();
+const { PrismaClient } = require("@prisma/client");
+const prisma = new PrismaClient();
 
-let posts = [
-  {
-    id: "1",
-    title: "about me",
-    message: "Hey im robin",
-    date: new Date(),
-  },
-  {
-    id: "2",
-    title: "about this journey",
-    message: "hey im dave",
-    date: new Date(),
-  },
-];
 
-postsRouter.get("/", (req, res) => {
-  return res.json(Object.values(posts));
+postsRouter.post("/", async (req, res) => {
+  const user = req.user.username;
+  
+
+  const findUser = await prisma.userinfo.findUnique({
+    where: {username: user},
+    select: {
+      following: true,
+    }
+  })
+  
+
+    const findPosts = await prisma.userposts.findMany({
+    where: { username: {
+      in: findUser.following,
+   }
+  }  
+  })
+
+
+  console.log(findPosts);
+  
+  return res.status(200).json(findPosts);
 });
 
-postsRouter.get("/:postId", (req, res) => {
-  const post = posts[req.params.postId];
-  if (post) {
-    return res.json(post);
-  } else {
-    return res.status(404).json({ error: "Post not found" });
-  }
-});
 
-postsRouter.post("/new", (req, res) => {
-  const { title, message } = req.body;
+postsRouter.post("/new", async (req, res) => {
+const arr = req.body;
+console.log(arr[0]);
 
-  if (!title || !message) {
-    return res
-      .status(400)
-      .json({ error: "Both title and message are required." });
-  }
+console.log(req.body);
+  const newPost = await prisma.userposts.create({
+    data: {
+      username: arr[0],
+      caption: arr[1],
+    }
+  });
 
-  const newPost = { title, message };
-  posts.push(newPost);
-
-  console.log(posts);
-  return res
-    .status(201)
-    .json({
-      success: true,
-      message: "Post created successfully!",
-      data: newPost,
-    });
+ console.log(newPost);
+return res.status(200).json()
 });
 
 module.exports = postsRouter;
