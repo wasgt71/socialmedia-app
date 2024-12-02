@@ -1,13 +1,15 @@
 import { useState } from "react";
 import myApi from "../components/axios";
+import { useNavigate } from "react-router-dom";
 
-function Comment() {
+function Comment({ id }) {
   const [unlock, setLock] = useState(false);
   const [showButton, setShowButton] = useState(true);
   const [data, setData] = useState("");
   const [comments, setComments] = useState([]);
+  const [render, setRender] = useState(false);
 
-const arr = [];
+  const arr = [];
 
   const handleClick = () => {
     setLock(true);
@@ -20,25 +22,36 @@ const arr = [];
     setLock(false);
     setShowButton(true);
 
-    const commentData = {
-      data,
-    };
-
-    const response = await myApi.post("/comment", commentData, {
+    const response = await myApi.post("/comment", [data, id], {
       withCredentials: true,
     });
     {
       console.log(response);
-     
+
       setComments((prevComments) => [
         ...prevComments,
-        { comment: data, user: response.data.username },
+        { comment: data, user: response.data.username, id: response.data.id },
       ]);
 
       setData("");
     }
   };
 
+  const deleteComment = async (e) => {
+    const id = e.target.value;
+    console.log(id);
+    const response = await myApi.post("/comment/delete", [id], {
+      withCredentials: true,
+    });
+    if(response.status === 200) {
+      renderContent();
+    }
+  };
+
+
+  const renderContent = () => {
+    setRender(true);
+  }
   return (
     <>
       <div>
@@ -52,19 +65,11 @@ const arr = [];
               placeholder="comment"
             ></input>
           )}
-          {unlock && <button type="submit">Post</button>}
+          {unlock && <button id={id}>Post</button>}
         </form>
-        </div>
+      </div>
 
-        <div>
-          {comments.map((comment) => (
-            <div>
-              <h3>{comment.user}</h3>
-              <p>{comment.comment}</p>
-            </div>
-          ))}
-          
-        </div>
+      
     </>
   );
 }
