@@ -1,36 +1,62 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import myApi from "../components/axios";
+import Comment from '../components/comment';
+import Like from '../components/like';
 
 function DisplayPosts() {
   const [posts, setPosts] = useState([]);
 
-  useEffect(() => {
-    fetch("http://localhost:3000/posts")
-      .then(function (response) {
-        return response.json();
-      })
-
-      .then(function (response) {
-        setPosts(response)
+   const retrievePosts = async () => {
+    const response = await myApi.post("/posts", {
+      withCredentials: true,
+    })
+    setPosts(response.data);
         console.log(response);
-      })
+        console.log(posts);
+      
+    }
+  useEffect(() => {
+    retrievePosts();
+  }, [])  
+ 
 
-      .catch(function (err) {});
-  }, []);
-
+  
   return (
     <>
       <div>
         <ul>
-          {posts.map((post) => {
-            return (
-              <>
-                <li>{post.title}</li>
-                <li>{post.message}</li>
-              </>
-            );
-          })}
-        
+          
+            
+              
+                <div>
+                  {posts.map((post) => {
+                    return (
+                      <>
+                  <li>{post.username}</li>
+                  <li>{post.caption}</li>
+                  <Comment></Comment>
+                  <Like></Like>
+                      </>
+                    )
+                  })}
+                </div>
+              
+            
+          
         </ul>
+      </div>
+      <div>
+        <Link to="/displayposts">Home</Link>
+      </div>
+      <div>
+        <Link to="/post">Post</Link>
+      </div>
+      <div>
+        <Link to="/profile">Profile</Link>
+      </div>
+      <div>
+        <Link to="/allusers">Connect</Link>
       </div>
     </>
   );
